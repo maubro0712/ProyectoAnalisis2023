@@ -1,0 +1,145 @@
+//Ganancia del sistema de control, de 0 a 10,932 es sobreamortiguado, en 10,932 
+//es críticamente amortiguado encima de esto hasta 2623 es subamoritguado
+Kcons=100
+
+//Se crea la función de transferencia de lazo cerrado T(s)
+numT=6.63*Kcons //Numerador de T(s)
+denT=poly([6.63*Kcons 171 101.71 1],'s','c') //Denominador de T(s)
+CloseLoopT=syslin('c',numT,denT) //Declaración de T(s))
+
+//Se crea la función de transferencia de lazo abierto Ge(s)
+numGe=6.63*Kcons //Numerador de Ge(s)
+denGe=poly([0 171 101.71 1],'s','c')//Denominador de Ge(s)
+OpenLoopGe=syslin('c',numGe,denGe) //Declaración de Ge(s)
+
+//Se crea la función de transferencia directa G(s)
+numG=20.83*Kcons//Numerador de G(s)
+denG=poly([0 171 101.71 1],'s','c')//Denominador de G(s)
+DirectG=syslin('c',numG,denG)//Declaración de G(s)
+
+//Variables para graficar, cambiar segun se desee
+Entrada1='step' //O 'impulse'
+
+t=0:0.1:15 //Eje de tiempo
+
+
+//Graficas para escalón unitario
+subplot(3,1,1)
+y1 =csim(Entrada1,t,DirectG)
+title('Respuesta ante entrada escalón unitario de la función de transferencia directa G(s)') 
+xlabel('t [unidades de tiempo]')
+ylabel('amplitud [rad]')
+plot(t,y1)
+
+
+subplot(3,1,2);
+y1 =csim(Entrada1,t,OpenLoopGe)
+title ('Respuesta ante entrada escalón unitario de la función de transferencia de lazo abierto Ge(s)')
+xlabel('t [unidades de tiempo]')
+ylabel('amplitud [rad]')
+plot (t,y1)
+
+
+subplot(3,1,3);
+y3 =csim(Entrada1,t,CloseLoopT)
+title ('Respuesta ante entrada escalón unitario de la función de transferencia de lazo cerrado T(s)')
+xlabel('t [unidades de tiempo]')
+ylabel('amplitud [rad]')
+plot (t,y3)
+
+figure(4)
+
+//Graficas para impulso unitario
+Entrada2='impulse'
+
+clf()
+
+subplot(3,1,1)
+y4 =csim(Entrada2,t,DirectG)
+title('Respuesta ante entrada impulso unitario de la función de transferencia directa G(s)') 
+xlabel('t [unidades de tiempo]')
+ylabel('amplitud [rad]')
+plot(t,y4)
+
+
+subplot(3,1,2);
+y5 =csim(Entrada2,t,OpenLoopGe)
+title ('Respuesta ante entrada impulso unitario de la función de transferencia de lazo abierto Ge(s)')
+xlabel('t [unidades de tiempo]')
+ylabel('amplitud [rad]')
+plot (t,y5)
+
+
+subplot(3,1,3);
+y6 =csim(Entrada2,t,CloseLoopT)
+title ('Respuesta ante entrada impulso unitario de la función de transferencia de lazo cerrado T(s)')
+xlabel('t [unidades de tiempo]')
+ylabel('amplitud [rad]')
+plot (t,y6)
+
+figure(5)
+
+
+//Lugar de las raíces para la función a usar
+clf()
+
+
+evans(CloseLoopT)
+xtitle('Lugar de las raíces para la función de transferencia a lazo cerrado')
+// Agregar grilla, lineas de asíntotas y cruces con jw
+
+sgrid()
+ch = gca().children //Atributos de ejes actuales
+curves = ch(2).children //Lineas de s donde K>0
+curves.thickness = 2 //Aumentar grosor de lineas
+
+asymptotes = ch(ch.type=="Segs") //Asintotas y color
+asymptotes.segs_color = color("grey70")
+
+[Ki,s] = kpure(CloseLoopT) // Cruce con el eje jw
+plot([real(s) real(s)],[imag(s) -imag(s)],'*r')
+
+[Kr,s] = krac2(CloseLoopT)//Valor de s de ruptura
+disp(s)
+figure(1)
+
+clf()
+evans(OpenLoopGe,0)
+xtitle('Lugar de las raíces para la función de transferencia a lazo abierto')
+// Agregar grilla, lineas de asíntotas y cruces con jw
+
+sgrid()
+ch = gca().children //Atributos de ejes actuales
+curves = ch(2).children //Lineas de s donde K>0
+curves.thickness = 2 //Aumentar grosor de lineas
+
+asymptotes = ch(ch.type=="Segs") //Asintotas y color
+asymptotes.segs_color = color("grey70")
+
+[Ki,s] = kpure(OpenLoopGe) // Cruce con el eje jw
+plot([real(s) real(s)],[imag(s) -imag(s)],'*r')
+
+[Kr,s] = krac2(OpenLoopGe)//Valor de s de ruptura
+disp(s)
+figure(2)
+
+clf()
+evans(DirectG)
+xtitle('Lugar de las raíces para la función de transferencia de trayectoria directa')
+// Agregar grilla, lineas de asíntotas y cruces con jw
+
+sgrid()
+ch = gca().children //Atributos de ejes actuales
+curves = ch(2).children //Lineas de s donde K>0
+curves.thickness = 2 //Aumentar grosor de lineas
+
+asymptotes = ch(ch.type=="Segs") //Asintotas y color
+asymptotes.segs_color = color("grey70")
+
+[Ki,s] = kpure(DirectG) // Cruce con el eje jw
+plot([real(s) real(s)],[imag(s) -imag(s)],'*r')
+
+[Kr,s] = krac2(DirectG)//Valor de s de ruptura
+disp(s)
+figure(3)
+
